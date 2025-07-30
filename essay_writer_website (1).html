@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EssayPro - AI Essay Writer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .essay-form {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .premium-lock {
+            background: #ff6b6b;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Popup Overlay */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .popup-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            color: white;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            animation: popupSlide 0.5s ease;
+            min-height: 600px;
+        }
+
+        @keyframes popupSlide {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .popup-title {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .popup-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .features-list {
+            text-align: left;
+            margin: 30px 0;
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-item {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-item::before {
+            content: "✨";
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .pricing {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .upgrade-btn {
+            flex: 1;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .upgrade-btn:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .skip-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .skip-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .result-area {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .essay-output {
+            min-height: 200px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .popup-buttons {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Popup Overlay -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-content">
+            <button class="close-btn" onclick="closePopup()">×</button>
+            
+            <div class="pricing">Only $9/month</div>
+            
+            <h2 class="popup-title">🚀 Unlock Premium</h2>
+            <p class="popup-subtitle">Take your essays to the next level!</p>
+            
+            <div class="features-list">
+                <div class="feature-item">Essays over 750 words</div>
+                <div class="feature-item">Graduate & PhD level complexity</div>
+                <div class="feature-item">Creative, narrative & analytical tones</div>
+                <div class="feature-item">Advanced research integration</div>
+                <div class="feature-item">Priority processing</div>
+                <div class="feature-item">Unlimited revisions</div>
+            </div>
+            
+            <div class="popup-buttons">
+                <button class="upgrade-btn" onclick="upgradeAccount()">🔥 Upgrade Now</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>✍️ EssayPro</h1>
+            <p class="subtitle">AI-Powered Essay Writing Assistant</p>
+        </header>
+
+        <div class="essay-form">
+            <h2>Create Your Essay</h2>
+            
+            <div class="form-group">
+                <label for="topic">Essay Topic</label>
+                <input type="text" id="topic" placeholder="Enter your essay topic..." required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="wordCount">Word Count</label>
+                    <select id="wordCount">
+                        <option value="250">250 words</option>
+                        <option value="500">500 words</option>
+                        <option value="750">750 words</option>
+                        <option value="1000" class="premium">1000 words 🔒</option>
+                        <option value="1500" class="premium">1500 words 🔒</option>
+                        <option value="2000" class="premium">2000 words 🔒</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="level">Academic Level</label>
+                    <select id="level">
+                        <option value="high-school">High School</option>
+                        <option value="college">College</option>
+                        <option value="graduate" class="premium">Graduate 🔒</option>
+                        <option value="phd" class="premium">PhD 🔒</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tone">Writing Tone</label>
+                    <select id="tone">
+                        <option value="academic">Academic</option>
+                        <option value="persuasive">Persuasive</option>
+                        <option value="descriptive">Descriptive</option>
+                        <option value="creative" class="premium">Creative 🔒</option>
+                        <option value="narrative" class="premium">Narrative 🔒</option>
+                        <option value="analytical" class="premium">Analytical 🔒</option>
+                        <option value="conversational" class="premium">Conversational 🔒</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="instructions">Additional Instructions (Optional)</label>
+                <textarea id="instructions" rows="3" placeholder="Any specific requirements or guidelines..."></textarea>
+            </div>
+
+            <button class="generate-btn" onclick="generateEssay()">Generate Essay</button>
+            
+            <div id="premiumWarning" class="premium-lock hidden">
+                <strong>🔒 Premium Feature Required</strong><br>
+                This combination requires a Premium subscription. Upgrade to unlock advanced features!
+            </div>
+        </div>
+
+        <div id="resultArea" class="result-area hidden">
+            <h3>Your Generated Essay</h3>
+            <div id="essayOutput" class="essay-output"></div>
+        </div>
+    </div>
+
+    <script>
+        let isPremium = false;
+
+        function closePopup() {
+            document.getElementById('popupOverlay').classList.add('hidden');
+        }
+
+        function upgradeAccount() {
+            // Simulate upgrade process
+            alert('Redirecting to payment page...\n\nNote: This is a demo. In a real application, this would integrate with a payment processor like Stripe.');
+            isPremium = true;
+            closePopup();
+        }
+
+        function checkPremiumRequired() {
+            const wordCount = parseInt(document.getElementById('wordCount').value);
+            const level = document.getElementById('level').value;
+            const tone = document.getElementById('tone').value;
+
+            const premiumWordCount = wordCount > 750;
+            const premiumLevel = ['graduate', 'phd'].includes(level);
+            const premiumTone = !['academic', 'persuasive', 'descriptive'].includes(tone);
+
+            return premiumWordCount || premiumLevel || premiumTone;
+        }
+
+        function generateEssay() {
+            const topic = document.getElementById('topic').value;
+            const wordCount = document.getElementById('wordCount').value;
+            const level = document.getElementById('level').value;
+            const tone = document.getElementById('tone').value;
+            const instructions = document.getElementById('instructions').value;
+
+            if (!topic.trim()) {
+                alert('Please enter an essay topic.');
+                return;
+            }
+
+            const needsPremium = checkPremiumRequired();
+            const warning = document.getElementById('premiumWarning');
+            const resultArea = document.getElementById('resultArea');
+            const essayOutput = document.getElementById('essayOutput');
+
+            if (needsPremium && !isPremium) {
+                warning.classList.remove('hidden');
+                resultArea.classList.add('hidden');
+                return;
+            }
+
+            warning.classList.add('hidden');
+            
+            // Simulate essay generation
+            const sampleEssay = generateSampleEssay(topic, wordCount, level, tone);
+            essayOutput.innerHTML = sampleEssay;
+            resultArea.classList.remove('hidden');
+            
+            // Smooth scroll to result
+            resultArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function generateSampleEssay(topic, wordCount, level, tone) {
+            const sampleParagraphs = [
+                `The topic of "${topic}" presents a fascinating area of study that has garnered significant attention in recent academic discourse. This essay will explore the various dimensions of this subject, providing a comprehensive analysis that demonstrates both depth of understanding and critical thinking.`,
+                
+                `From a theoretical perspective, the implications of ${topic} extend far beyond surface-level observations. Contemporary research suggests that the complexity inherent in this subject requires a multifaceted approach to fully appreciate its significance in our modern context.`,
+                
+                `Furthermore, the practical applications of understanding ${topic} cannot be overstated. The knowledge gained from examining this subject contributes to broader discussions in the field and provides valuable insights for future research endeavors.`,
+                
+                `In conclusion, the examination of ${topic} reveals the intricate relationships between theory and practice, highlighting the importance of continued scholarly investigation. This analysis demonstrates the value of approaching complex subjects with both rigor and intellectual curiosity.`
+            ];
+
+            let essay = '';
+            const targetWords = parseInt(wordCount);
+            const wordsPerParagraph = targetWords / sampleParagraphs.length;
+
+            sampleParagraphs.forEach((paragraph, index) => {
+                essay += `<p style="margin-bottom: 20px; text-indent: 30px;">${paragraph}`;
+                
+                // Add filler content based on word count
+                if (targetWords > 500) {
+                    essay += ` The depth of analysis required for ${level} level work demands careful consideration of multiple perspectives and theoretical frameworks. This comprehensive approach ensures that all relevant aspects of the topic are thoroughly examined and evaluated.`;
+                }
+                
+                if (targetWords > 1000) {
+                    essay += ` Advanced research methodologies and critical evaluation techniques are essential components of this scholarly investigation, contributing to the overall academic rigor of the analysis.`;
+                }
+                
+                essay += `</p>`;
+            });
+
+            return essay;
+        }
+
+        // Update form based on premium status
+        document.addEventListener('DOMContentLoaded', function() {
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => {
+                select.addEventListener('change', function() {
+                    const warning = document.getElementById('premiumWarning');
+                    if (checkPremiumRequired() && !isPremium) {
+                        warning.classList.remove('hidden');
+                    } else {
+                        warning.classList.add('hidden');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
